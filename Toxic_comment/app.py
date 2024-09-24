@@ -1,10 +1,15 @@
-### Importing the required packages
 import streamlit as st
 import joblib
 import numpy as np
 import pandas as pd
 import os
 import re
+import string  # Add this import
+
+# Re-define the tokenize function
+re_tok = re.compile(f'([{string.punctuation}“”¨«»®´·º½¾¿¡§£₤‘’])')
+def tokenize(s):
+    return re_tok.sub(r'\1', s).split()
 
 # Load the vectorizer
 try:
@@ -27,11 +32,6 @@ for label in label_cols:
     else:
         st.error(f"Model file for '{label}' not found. Please ensure '{model_file}' is available.")
         st.stop()
-
-# Define the tokenize function
-def tokenize(text):
-    tokens = re.findall(r'\b\w+\b', text.lower())
-    return tokens
 
 # Define Streamlit app
 def main():
@@ -63,8 +63,8 @@ def main():
             # Display a bar chart
             st.subheader("Toxicity Levels")
             chart_data = pd.DataFrame({
-                'Label': predictions.keys(),
-                'Probability': predictions.values()
+                'Label': list(predictions.keys()),  # Ensure keys are converted to a list
+                'Probability': list(predictions.values())  # Ensure values are converted to a list
             })
             chart_data.set_index('Label', inplace=True)
             st.bar_chart(chart_data)
